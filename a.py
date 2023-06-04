@@ -10,6 +10,7 @@ import time
 from playsound import playsound
 import numpy as np
 from fpdf import FPDF
+from pdf_mail import sendpdf
 
 
 def add_item():
@@ -19,6 +20,7 @@ def add_item():
    
 def remove_item():
    dict["flag"]=1
+   print(dict["flag"])
    time.sleep(0.1)
    msg.config(text="Scan the product to remove from cart",bg="#053246",fg="yellow")
    
@@ -56,6 +58,26 @@ def end_shopping():
    for i in fd:
       pdf.cell(100,10,txt = i,ln =1, align='C')
    pdf.output("F:\\python programs\\my.pdf")
+   print("done")
+   
+   sender_email_address ="chetankulkarni004@gmail.com" 
+   receiver_email_address ="srushtishastrybelagere123@gmail.com"
+   sender_email_password ="ndraumwobxpodnav"
+   subject_of_email ="SMARTCART"  
+   body_of_email ="Dear customer ,Thank for shopping with us.........😊"
+   filename ="my"       
+   location_of_file ="F:\python programs"
+  
+
+   k = sendpdf(sender_email_address, 
+            receiver_email_address,
+            sender_email_password,
+            subject_of_email,
+            body_of_email,
+            filename,
+            location_of_file)
+ 
+   k.email_send()
    
    
 root=Tk()
@@ -102,6 +124,7 @@ D=[]            #list to store scanned qr data
 dict={'flag':0} #to decide the add or remove operation
 item_list=[]  #ontains the product list till end 
 R=[] 
+new_list=[]
 
 name="chetan"
 bill_no="12452"
@@ -143,25 +166,28 @@ def show_frames():
                            break
                   if done==0:
                      item_list.append(D)
+                     new_list.append(D)
                      item_list.sort()
                      print(item_list)
                      quantity=[]
 
-                     for i in range(0,len(item_list)-1,1):
+                     for i in range(0,len(new_list)-1,1):
                         quantity.append(1)
                         count=0
-                        for j in range(i+1,len(item_list),1):
-                           if item_list[i][0]==item_list[j][0]:
+                        for j in range(i+1,len(new_list),1):
+                           if new_list[i][0]==new_list[j][0]:
                                  count+=1
-                                 item_list[i][4]+=item_list[j][4]
+                                 new_list[i][4]+=new_list[j][4]
                                  quantity[i]+=1
-                                 item_list.pop(i + 1)
+                                 new_list.pop(i + 1)
                            else:
                                  i=j
                                  break
 
                      print(quantity)
                      print(item_list)
+                     print("new list :")
+                     print(new_list)
                      playsound(r'C:\Users\chetan kulkarni\Downloads\project_voice.mp3')
                   elif done==1:
                      playsound(r'C:\Users\chetan kulkarni\Downloads\already_present.mp3')
@@ -176,9 +202,9 @@ def show_frames():
                   bill.insert(END,"\nProduct\t\t\tQty\t\tPrice")
                   bill.insert(END,"\n==================================================\n")
                   
-                  l=len(item_list)
+                  l=len(new_list)
                   for i in range(0,l):
-                     info=(f"{item_list[i][0]}\t\t\t{item_list[i][4]}\t\t{item_list[i][1]*item_list[i][4]}\n")
+                     info=(f"{new_list[i][0]}\t\t\t{new_list[i][4]}\t\t{new_list[i][1]*new_list[i][4]}\n")
                      bill.insert(END,info)
                         
                elif dict["flag"]==1:
@@ -193,6 +219,13 @@ def show_frames():
                         if D==b: 
                            done=1
                            item_list.pop(each)
+                           for i in range(0,len(new_list)):
+                              if new_list[i][0]==D[0] and len(new_list)>0:
+                                 print("yes")
+                                 if new_list[i][4]==1:
+                                    new_list.pop(i)
+                                 else:
+                                    new_list[i][4]=new_list[i][4]-1
                            break
                   winsound.Beep(3500,1000)
                   time.sleep(1)
@@ -214,14 +247,15 @@ def show_frames():
                        "\nProduct\t\t\tQty\t\tPrice","\n=================================================="]
                   file1.writelines(L)
                   file1.close()
-                  l=len(item_list)
-                  if done==1:
-                     playsound(r'C:\Users\chetan kulkarni\Downloads\remove_voice.mp3')
-                  elif done==0:
-                     playsound(r'C:\Users\chetan kulkarni\Downloads\remove_not_present.mp3')
+                  l=len(new_list)
+                  # if done==1:
+                  #    playsound(r'C:\Users\chetan kulkarni\Downloads\remove_voice.mp3')
+                  #    print("removed")
+                  # elif done==0:
+                  #    playsound(r'C:\Users\chetan kulkarni\Downloads\remove_not_present.mp3')
                      
                   for i in range(0,l):
-                     info=(f"{item_list[i][0]}\t\t\t{item_list[i][4]}\t\t{item_list[i][1]}\n")
+                     info=(f"{new_list[i][0]}\t\t\t{new_list[i][4]}\t\t{new_list[i][1]}\n")
                      bill.insert(END,info)     
    img = Image.fromarray(cv2image)
    # Convert image to PhotoImage
